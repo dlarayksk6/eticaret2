@@ -1,0 +1,53 @@
+const express = require('express');
+const router  = express.Router();
+const jwt     = require('jsonwebtoken');
+const Cart    = require('../models/Cart');
+const Order   = require('../models/Order');
+const { JWT_SECRET } = process.env;
+
+const authenticate = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Token gerekli' });
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) return res.status(403).json({ message: 'Geçersiz token' });
+    req.user = decoded;
+    next();
+  });
+};
+
+// POST /api/order/complete → Siparişi oluştur ve sepeti temizle
+router.post('/complete', authenticate, async (req, res) => {
+  try {
+    const cart = await Cart.findOne({ userId: req.user.id });
+    if (!cart || cart.items.length === 0) {
+      return res.status(400).json({ message: 'Sepet boş' });
+    }
+
+    const order = await Order.create({
+      userId: req.user.id,
+      items: cart.items,
+      totalPrice: cart.totalPrice
+    });
+
+    // Sepeti sıfırla
+    cart.items = [];
+    cart.totalPrice = 0;
+    await cart.save();
+
+    res.json({ message: 'Siparişiniz alındı', order });
+  } catch (err) {
+    res.status(500).json({ message: 'Sipariş hatası', error: err });
+  }
+});
+
+// GET /api/order/history → Kullanıcının sipariş geçmişi
+router.get('/history', authenticate, async (req, res) => {
+  try {
+    const orders = await Order.find({ userId: req.user.id });
+    res.json({ orders });
+  } catch (err) {
+    res.status(500).json({ message: 'Sunucu hatası', error: err });
+  }
+});
+
+module.exports = router;

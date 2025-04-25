@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ana Sayfa</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Ana Sayfa</h1>
+        <p>Hoş geldiniz! Giriş başarılı.</p>
+        <button id="logoutButton">Çıkış Yap</button>
+    </div>
+
+    <script>
+        // Kullanıcı daha önce giriş yaptıysa, token'ı kontrol et
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            window.location.href = "login.html";  // Token yoksa, giriş sayfasına yönlendir
+        }
+
+        // Token'ın süresi dolmamışsa, sayfa yenilenebilir.
+        const tokenExpiry = JSON.parse(atob(token.split('.')[1])).exp * 1000;
+        const currentTime = Date.now();
+
+        if (currentTime > tokenExpiry) {
+            localStorage.removeItem("token");
+            window.location.href = "login.html";  // Token süresi dolmuşsa, giriş sayfasına yönlendir
+        }
+
+        // Çıkış yap butonu
+        document.getElementById("logoutButton").addEventListener("click", () => {
+            localStorage.removeItem("token");
+            window.location.href = "login.html";  // Çıkış yaptıktan sonra giriş sayfasına yönlendir
+        });
+    </script>
+</body>
+
+</html>
