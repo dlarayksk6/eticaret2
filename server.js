@@ -9,18 +9,17 @@ const path = require('path');
 const app = express();
 const PORT = 5000;
 
-app.use(cors());  // CORS middleware
-app.use(express.json()); // JSON verileri almak için middleware
-app.use(express.static(path.join(__dirname, 'public'))); // Statik dosyaları sunmak için
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// 📝 Login sayfası servisi
+
 app.get("/login.html", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
-// 📝 Kullanıcı Kaydı
 app.post('/register', async (req, res) => {
     const { username, password, email, role } = req.body;
     console.log("Gelen veri:", req.body);
@@ -38,7 +37,7 @@ app.post('/register', async (req, res) => {
         res.status(201).json({ message: "Kayıt başarılı" });
 
     } catch (err) {
-        console.error("Kayıt hatası detay:", err); // Bu satır önemli!
+        console.error("Kayıt hatası detay:", err);
         res.status(500).json({ message: "Kayıt hatası", error: err.message });
     }
 
@@ -64,31 +63,31 @@ app.post('/login', async (req, res) => {
             return res.status(400).json({ message: "Kullanıcı bulunamadı" });
         }
 
-        const user = rows[0];  // Kullanıcıyı rows[0] olarak aldık
+        const user = rows[0];
 
-        // Şifreyi doğrulama
+
         const validPassword = await bcrypt.compare(password, user.password);
 
         if (!validPassword) {
             return res.status(400).json({ message: "Geçersiz şifre" });
         }
 
-        // JWT Token oluştur
+
         const token = jwt.sign(
             { id: user.id, username: user.username, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
 
-        // Başarıyla giriş yaptıysa, token ve kullanıcı bilgisi ile cevap dön
-        console.log("Giriş başarılı, kullanıcı verisi:", user);  // Gelen kullanıcı verisini kontrol et
+
+        console.log("Giriş başarılı, kullanıcı verisi:", user);
         res.json({
             message: "Giriş başarılı",
             token,
             user: {
                 id: user.id,
                 username: user.username,
-                role: user.role // Kullanıcı rolünü de ekliyoruz
+                role: user.role
             }
         });
 
@@ -99,7 +98,6 @@ app.post('/login', async (req, res) => {
 });
 
 
-// 📝 Token Doğrulama
 app.get('/protected', (req, res) => {
     const token = req.headers['authorization'];
 
@@ -115,11 +113,11 @@ app.get('/protected', (req, res) => {
     });
 });
 
-// 📝 Ana Sayfa
+
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "register.html"));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Sunucu ${PORT} portunda çalışıyor!`);
 });
