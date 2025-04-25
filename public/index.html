@@ -12,6 +12,7 @@
     <div class="container">
         <h1>Ana Sayfa</h1>
         <p>Hoş geldiniz! Giriş başarılı.</p>
+        <button id="cartButton">Sepetim</button>
         <button id="logoutButton">Çıkış Yap</button>
     </div>
 
@@ -31,6 +32,11 @@
             localStorage.removeItem("token");
             window.location.href = "login.html";  // Token süresi dolmuşsa, giriş sayfasına yönlendir
         }
+
+        // Yeni: "Sepetim" butonuna tıklanınca cart.html'e yönlendir
+       document.getElementById("cartButton").addEventListener("click", () => {
+             window.location.href = "cart.html";
+    });
 
         // Çıkış yap butonu
         document.getElementById("logoutButton").addEventListener("click", () => {
