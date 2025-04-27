@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tedarikçi Paneli</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn {
+            padding: 8px 16px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        }
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-warning {
+            background-color: #ff9800;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Tedarikçi Paneli</h1>
+        <div id="userInfo">
+            Kullanıcı bilgileri yükleniyor...
+        </div>
+        
+        <button id="addProductBtn" class="btn btn-primary">Yeni Ürün Ekle</button>
+        
+        <h2>Ürünlerim</h2>
+        <div id="productsList">
+            <table id="productsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Ürün Adı</th>
+                        <th>Açıklama</th>
+                        <th>Fiyat</th>
+                        <th>Stok</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                    <!-- Ürünler buraya dinamik olarak eklenecek -->
+                </tbody>
+            </table>
+        </div>
+        
+        <button id="logoutButton" class="btn btn-danger">Çıkış Yap</button>
+    </div>
+
+    <!-- Ürün Ekleme Modal -->
+    <div id="addProductModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Yeni Ürün Ekle</h2>
+            <form id="addProductForm">
+                <label for="productName">Ürün Adı:</label>
+                <input type="text" id="productName" name="productName" required>
+                
+                <label for="productDescription">Açıklama:</label>
+                <textarea id="productDescription" name="productDescription"></textarea>
+                
+                <label for="productPrice">Fiyat:</label>
+                <input type="number" id="productPrice" name="productPrice" step="0.01" required>
+                
+                <label for="productStock">Stok:</label>
+                <input type="number" id="productStock" name="productStock" required>
+                
+                <button type="submit" class="btn btn-primary">Ekle</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ürün Güncelleme Modal -->
+    <div id="editProductModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Ürün Güncelle</h2>
+            <form id="editProductForm">
+                <input type="hidden" id="editProductId">
+                
+                <label for="editProductName">Ürün Adı:</label>
+                <input type="text" id="editProductName" name="editProductName" required>
+                
+                <label for="editProductDescription">Açıklama:</label>
+                <textarea id="editProductDescription" name="editProductDescription"></textarea>
+                
+                <label for="editProductPrice">Fiyat:</label>
+                <input type="number" id="editProductPrice" name="editProductPrice" step="0.01" required>
+                
+                <label for="editProductStock">Stok:</label>
+                <input type="number" id="editProductStock" name="editProductStock" required>
+                
+                <button type="submit" class="btn btn-primary">Güncelle</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Token kontrolü
+        const token = localStorage.getItem("token");
+        if (!token) {
+            window.location.href = "login.html";  // Token yoksa, giriş sayfasına yönlendir
+        }
+
+        // Token'ın süresi dolmamışsa, sayfa yenilenebilir.
+        try {
+            const tokenExpiry = JSON.parse(atob(token.split('.')[1])).exp * 1000;
+            const currentTime = Date.now();
+
+            if (currentTime > tokenExpiry) {
+                localStorage.removeItem("token");
+                window.location.href = "login.html";  // Token süresi dolmuşsa, giriş sayfasına yönlendir
+            }
+
+            // Kullanıcı bilgisini çöz
+            const tokenData = JSON.parse(atob(token.split('.')[1]));
+            document.getElementById("userInfo").innerHTML = `
+                <p>Hoş Geldin: <strong>${tokenData.username}</strong> | Rol: <strong>${tokenData.role}</strong></p>
+            `;
+
+            // Eğer rol tedarikçi değilse ana sayfaya yönlendir
+            if (tokenData.role !== "supplier") {
+                alert("Bu sayfaya erişim izniniz yok!");
+                window.location.href = "index.html";
+            }
+        } catch (e) {
+            console.error("Token çözümlenirken hata:", e);
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+        }
+
+        // Ürünleri getir
+        async function fetchProducts() {
+            try {
+                const response = await fetch("http://localhost:5000/api/products", {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error("Ürünler getirilemedi");
+                }
+
+                const products = await response.json();
+                displayProducts(products);
+            } catch (error) {
+                console.error("Hata:", error);
+                alert("Ürünler yüklenirken bir hata oluştu.");
+            }
+        }
+
+        // Ürünleri tabloda göster
+        function displayProducts(products) {
+            const tableBody = document.getElementById("productsTableBody");
+            tableBody.innerHTML = "";
+
+            if (products.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">Henüz ürün eklenmemiş.</td></tr>`;
+                return;
+            }
+
+            products.forEach(product => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${product.id}</td>
+                    <td>${product.name}</td>
+                    <td>${product.description || "-"}</td>
+                    <td>${product.price}</td>
+                    <td>${product.stock}</td>
+                    <td>
+                        <button class="btn btn-warning edit-btn" data-id="${product.id}">Düzenle</button>
+                        <button class="btn btn-danger delete-btn" data-id="${product.id}">Sil</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Düzenle butonlarına event listener ekle
+            document.querySelectorAll(".edit-btn").forEach(button => {
+                button.addEventListener("click", () => editProduct(button.dataset.id));
+            });
+
+            // Sil butonlarına event listener ekle
+            document.querySelectorAll(".delete-btn").forEach(button => {
+                button.addEventListener("click", () => deleteProduct(button.dataset.id));
+            });
+        }
+
+        // Modal açma/kapama işlevleri
+        const addProductModal = document.getElementById("addProductModal");
+        const editProductModal = document.getElementById("editProductModal");
+        const addProductBtn = document.getElementById("addProductBtn");
+
+        addProductBtn.addEventListener("click", () => {
+            addProductModal.style.display = "block";
+        });
+
+        document.querySelectorAll(".close").forEach(closeBtn => {
+            closeBtn.addEventListener("click", () => {
+                addProductModal.style.display = "none";
+                editProductModal.style.display = "none";
+            });
+        });
+
+        window.addEventListener("click", (e) => {
+            if (e.target === addProductModal) {
+                addProductModal.style.display = "none";
+            }
+            if (e.target === editProductModal) {
+                editProductModal.style.display = "none";
+            }
+        });
+
+        // Ürün ekleme formu submit
+        document.getElementById("addProductForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const productData = {
+                name: document.getElementById("productName").value,
+                description: document.getElementById("productDescription").value,
+                price: parseFloat(document.getElementById("productPrice").value),
+                stock: parseInt(document.getElementById("productStock").value)
+            };
+
+            try {
+                const response = await fetch("http://localhost:5000/api/products", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(productData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("Ürün başarıyla eklendi!");
+                    document.getElementById("addProductForm").reset();
+                    addProductModal.style.display = "none";
+                    fetchProducts(); // Ürünleri yeniden yükle
+                } else {
+                    alert(data.message || "Ürün eklenirken bir hata oluştu");
+                }
+            } catch (error) {
+                console.error("Hata:", error);
+                alert("Ürün eklenirken bir hata oluştu.");
+            }
+        });
+
+        // Ürün düzenleme
+        async function editProduct(productId) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/products`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error("Ürünler getirilemedi");
+                }
+
+                const products = await response.json();
+                const product = products.find(p => p.id == productId);
+
+                if (!product) {
+                    throw new Error("Ürün bulunamadı");
+                }
+
+                // Modal'ı doldur ve göster
+                document.getElementById("editProductId").value = product.id;
+                document.getElementById("editProductName").value = product.name;
+                document.getElementById("editProductDescription").value = product.description || "";
+                document.getElementById("editProductPrice").value = product.price;
+                document.getElementById("editProductStock").value = product.stock;
+
+                editProductModal.style.display = "block";
+            } catch (error) {
+                console.error("Hata:", error);
+                alert("Ürün bilgileri yüklenirken bir hata oluştu.");
+            }
+        }
+
+        // Ürün güncelleme formu submit
+        document.getElementById("editProductForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const productId = document.getElementById("editProductId").value;
+            const productData = {
+                name: document.getElementById("editProductName").value,
+                description: document.getElementById("editProductDescription").value,
+                price: parseFloat(document.getElementById("editProductPrice").value),
+                stock: parseInt(document.getElementById("editProductStock").value)
+            };
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(productData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("Ürün başarıyla güncellendi!");
+                    editProductModal.style.display = "none";
+                    fetchProducts(); // Ürünleri yeniden yükle
+                } else {
+                    alert(data.message || "Ürün güncellenirken bir hata oluştu");
+                }
+            } catch (error) {
+                console.error("Hata:", error);
+                alert("Ürün güncellenirken bir hata oluştu.");
+            }
+        });
+
+        // Ürün silme
+        async function deleteProduct(productId) {
+            if (confirm("Bu ürünü silmek istediğinize emin misiniz?")) {
+                try {
+                    const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+                        method: "DELETE",
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        alert("Ürün başarıyla silindi!");
+                        fetchProducts(); // Ürünleri yeniden yükle
+                    } else {
+                        alert(data.message || "Ürün silinirken bir hata oluştu");
+                    }
+                } catch (error) {
+                    console.error("Hata:", error);
+                    alert("Ürün silinirken bir hata oluştu.");
+                }
+            }
+        }
+
+        // Çıkış yap butonu
+        document.getElementById("logoutButton").addEventListener("click", () => {
+            localStorage.removeItem("token");
+            window.location.href = "login.html";  // Çıkış yaptıktan sonra giriş sayfasına yönlendir
+        });
+
+        // Sayfa yüklendiğinde ürünleri getir
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchProducts();
+        });
+    </script>
+</body>
+
+</html>

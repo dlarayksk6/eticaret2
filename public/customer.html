@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ürünler - Müşteri Paneli</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .product-card {
+            transition: transform 0.2s;
+            height: 100%;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-image {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .search-container {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">E-Ticaret</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Ürünler</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <button id="logoutButton" class="btn btn-outline-light">Çıkış Yap</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="search-container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group mb-3">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Ürün ara...">
+                        <button class="btn btn-primary" type="button" onclick="searchProducts()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <select id="supplierFilter" class="form-select" onchange="filterProducts()">
+                        <option value="">Tüm Tedarikçiler</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="productsContainer">
+            <!-- Ürünler buraya dinamik olarak eklenecek -->
+        </div>
+    </div>
+
+    <script>
+        // Token kontrolü
+        const token = localStorage.getItem("token");
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
+        // Tedarikçileri getir
+        async function loadSuppliers() {
+            try {
+                const response = await fetch('/api/suppliers/all');
+                const suppliers = await response.json();
+
+                const select = document.getElementById('supplierFilter');
+                suppliers.forEach(supplier => {
+                    const option = document.createElement('option');
+                    option.value = supplier.userId;
+                    option.textContent = supplier.storeName;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Tedarikçi yükleme hatası:', error);
+            }
+        }
+
+        // Ürünleri getir
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products');
+                const products = await response.json();
+                displayProducts(products);
+            } catch (error) {
+                console.error('Ürün yükleme hatası:', error);
+            }
+        }
+
+        // Ürünleri görüntüle
+        function displayProducts(products) {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '';
+
+            if (products.length === 0) {
+                container.innerHTML = '<div class="col-12 text-center"><p>Ürün bulunamadı.</p></div>';
+                return;
+            }
+
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'col-md-4 mb-4';
+                card.innerHTML = `
+                    <div class="card product-card">
+                        <img src="${product.image || 'https://via.placeholder.com/300'}" 
+                             class="card-img-top product-image" alt="${product.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.name}</h5>
+                            <p class="card-text">${product.description || 'Açıklama yok'}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h5 mb-0">${product.price.toFixed(2)} TL</span>
+                                <span class="badge bg-info">Stok: ${product.stock}</span>
+                            </div>
+                            <button class="btn btn-primary w-100 mt-3" onclick="addToCart('${product._id}')">
+                                Sepete Ekle
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Ürün ara
+        function searchProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const products = document.querySelectorAll('.product-card');
+
+            products.forEach(card => {
+                const title = card.querySelector('.card-title').textContent.toLowerCase();
+                const description = card.querySelector('.card-text').textContent.toLowerCase();
+
+                if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.parentElement.style.display = '';
+                } else {
+                    card.parentElement.style.display = 'none';
+                }
+            });
+        }
+
+        // Tedarikçiye göre filtrele
+        async function filterProducts() {
+            const supplierId = document.getElementById('supplierFilter').value;
+            try {
+                const response = await fetch(supplierId ? `/api/products?supplierId=${supplierId}` : '/api/products');
+                const products = await response.json();
+                displayProducts(products);
+            } catch (error) {
+                console.error('Filtreleme hatası:', error);
+            }
+        }
+
+        // Sepete ekle
+        function addToCart(productId) {
+            // Sepet işlemleri burada yapılacak
+            alert('Ürün sepete eklendi!');
+        }
+
+        // Çıkış yap
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        });
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSuppliers();
+            loadProducts();
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -39,7 +40,7 @@
       padding: 15px;
       width: 200px;
       text-align: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       transition: transform 0.2s;
     }
 
@@ -78,26 +79,27 @@
       width: 40px;
       text-align: center;
     }
-    .cart-button {
-        background-color: #2196F3;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        cursor: pointer;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        transition: background-color 0.3s;
-        margin-top:20px;
-        width:200px;
-        display:block;
-        margin-left:auto;
-        margin-right:auto;
-}
 
-.cart-button:hover {
-  background-color: #0b7dda;
-}
+    .cart-button {
+      background-color: #2196F3;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.3s;
+      margin-top: 20px;
+      width: 200px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cart-button:hover {
+      background-color: #0b7dda;
+    }
 
     @media (max-width: 480px) {
       .cart-button {
@@ -105,12 +107,11 @@
         left: 5%;
         right: 5%;
         border-radius: 10px;
+      }
     }
-}
-
-
   </style>
 </head>
+
 <body>
 
   <div class="welcome">Giriş başarılı!</div>
@@ -124,36 +125,39 @@
 
   <script>
     const token = localStorage.getItem('token');
-    if(!token) {
-        window.location.href ='login.html';
+    if (!token) {
+      window.location.href = 'login.html';
     }
-
-    const products = [
-      { id: 'p1', name: 'Tişört', price: 150 },
-      { id: 'p2', name: 'Ayakkabı', price: 450 },
-      { id: 'p3', name: 'Şapka', price: 100 },
-      { id: 'p4', name: 'Çanta', price: 300 }
-    ];
 
     const container = document.getElementById('products');
 
-    products.forEach(product => {
-      const div = document.createElement('div');
-      div.className = 'product';
+    // Ürünleri API'den çek
+    fetch('http://localhost:5000/api/products/all')
+      .then(res => res.json())
+      .then(products => {
+        container.innerHTML = ""; // Önce temizle
+        products.forEach(product => {
+          const div = document.createElement('div');
+          div.className = 'product';
 
-      div.innerHTML = `
-        <h3>${product.name}</h3>
-        <p>${product.price} ₺</p>
-        <div class="quantity-controls">
-          <button onclick="changeQuantity('${product.id}', -1)">-</button>
-          <input type="number" id="qty-${product.id}" value="1" min="1">
-          <button onclick="changeQuantity('${product.id}', 1)">+</button>
-        </div>
-        <button onclick="addToCart('${product.id}', '${product.name}', ${product.price})">Sepete Ekle</button>
-      `;
+          div.innerHTML = `
+            <h3>${product.name}</h3>
+            <p>${product.price} ₺</p>
+            <div class="quantity-controls">
+              <button onclick="changeQuantity('${product._id}', -1)">-</button>
+              <input type="number" id="qty-${product._id}" value="1" min="1">
+              <button onclick="changeQuantity('${product._id}', 1)">+</button>
+            </div>
+            <button onclick="addToCart('${product._id}', '${product.name}', ${product.price})">Sepete Ekle</button>
+          `;
 
-      container.appendChild(div);
-    });
+          container.appendChild(div);
+        });
+      })
+      .catch(err => {
+        container.innerHTML = "<p>Ürünler yüklenemedi.</p>";
+        console.error(err);
+      });
 
     function changeQuantity(id, delta) {
       const input = document.getElementById(`qty-${id}`);
@@ -188,11 +192,11 @@
         console.error(error);
       }
     }
-    function goToCart(){
-        window.location.href = 'cart.html';
+    function goToCart() {
+      window.location.href = 'cart.html';
     }
-
 
   </script>
 </body>
+
 </html>

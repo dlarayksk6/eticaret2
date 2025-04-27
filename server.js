@@ -1,18 +1,19 @@
-require('dotenv').config();                   
+require('dotenv').config();
 
-const express       = require('express');
-const bcrypt        = require('bcryptjs');
-const jwt           = require('jsonwebtoken');
-const cors          = require('cors');
-const pool          = require('./db');           
-const connectMongo  = require('./mongo');       
-const cartRoutes    = require('./routes/cart');
-const orderRoutes   = require('./routes/order'); 
-const path          = require('path');
+const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const cors = require('cors');
+const pool = require('./db');
+const { connectMongo } = require('./mongo');
+const cartRoutes = require('./routes/cart');
+const orderRoutes = require('./routes/order');
+const path = require('path');
+const productRoutes = require('./routes/products');
 
-const app       = express();
-const PORT      = process.env.PORT || 5000;
-const JWT_SECRET= process.env.JWT_SECRET;
+const app = express();
+const PORT = process.env.PORT || 5000;
+const JWT_SECRET = process.env.JWT_SECRET;
 
 connectMongo();
 
@@ -21,8 +22,9 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-app.use('/api/cart',  cartRoutes);   
-app.use('/api/order', orderRoutes);  
+app.use('/api/cart', cartRoutes);
+app.use('/api/order', orderRoutes);
+app.use('/api/products', productRoutes);
 
 
 app.get("/login.html", (req, res) => {

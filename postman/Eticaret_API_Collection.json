@@ -1,0 +1,160 @@
+{
+    "info": {
+        "_postman_id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+        "name": "Eticaret API Collection",
+        "description": "E-ticaret API test koleksiyonu",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Ürün Yönetimi",
+            "item": [
+                {
+                    "name": "Yeni Ürün Ekle",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Test Ürünü\",\n    \"description\": \"Test ürün açıklaması\",\n    \"price\": 99.99,\n    \"stock\": 100\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5000/api/products",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5000",
+                            "path": [
+                                "api",
+                                "products"
+                            ]
+                        },
+                        "description": "Tedarikçi rolüne sahip kullanıcılar için yeni ürün ekleme"
+                    }
+                },
+                {
+                    "name": "Ürün Güncelle",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Güncellenmiş Ürün\",\n    \"price\": 149.99,\n    \"stock\": 50\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5000/api/products/:id",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5000",
+                            "path": [
+                                "api",
+                                "products",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "ürün_id",
+                                    "description": "Güncellenecek ürünün ID'si"
+                                }
+                            ]
+                        },
+                        "description": "Tedarikçi rolüne sahip kullanıcılar için ürün güncelleme"
+                    }
+                },
+                {
+                    "name": "Ürün Sil",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:5000/api/products/:id",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5000",
+                            "path": [
+                                "api",
+                                "products",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "ürün_id",
+                                    "description": "Silinecek ürünün ID'si"
+                                }
+                            ]
+                        },
+                        "description": "Tedarikçi rolüne sahip kullanıcılar için ürün silme (soft delete)"
+                    }
+                },
+                {
+                    "name": "Ürünleri Listele",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:5000/api/products",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5000",
+                            "path": [
+                                "api",
+                                "products"
+                            ]
+                        },
+                        "description": "Tüm ürünleri listele (Tedarikçiler için silinmiş ürünler de dahil)"
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "token",
+            "value": "jwt_token_here",
+            "type": "string"
+        }
+    ]
+}
