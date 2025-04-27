@@ -1,17 +1,19 @@
+// mongo.js
+
 const mongoose = require('mongoose');
+require('dotenv').config(); // .env dosyasını okuyalım
 
 const connectMongo = async () => {
   try {
-    await mongoose.connect('mongodb://localhost:27017/eticaret', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    await mongoose.connect(process.env.MONGO_URI); // Atlas bağlantısı
     console.log('✔ MongoDB bağlantısı başarılı');
   } catch (err) {
     console.error('✘ MongoDB bağlantı hatası:', err);
   }
 };
-// ürün şeması
+
+// Ürün Şeması (Product)
+
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
