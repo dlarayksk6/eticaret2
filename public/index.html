@@ -1,49 +1,198 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ana Sayfa</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ana Sayfa</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .welcome {
+      text-align: center;
+      font-size: 1rem;
+      color: #4CAF50;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .products {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .product {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      width: 200px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .product:hover {
+      transform: scale(1.05);
+    }
+
+    .product button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .product button:hover {
+      background-color: #45a049;
+    }
+
+    .quantity-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .quantity-controls button {
+      padding: 4px 8px;
+      font-size: 16px;
+    }
+
+    .quantity-controls input {
+      width: 40px;
+      text-align: center;
+    }
+    .cart-button {
+        background-color: #2196F3;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transition: background-color 0.3s;
+        margin-top:20px;
+        width:200px;
+        display:block;
+        margin-left:auto;
+        margin-right:auto;
+}
+
+.cart-button:hover {
+  background-color: #0b7dda;
+}
+
+    @media (max-width: 480px) {
+      .cart-button {
+        width: 90%;
+        left: 5%;
+        right: 5%;
+        border-radius: 10px;
+    }
+}
+
+
+  </style>
 </head>
-
 <body>
-    <div class="container">
-        <h1>Ana Sayfa</h1>
-        <p>Hoş geldiniz! Giriş başarılı.</p>
-        <button id="cartButton">Sepetim</button>
-        <button id="logoutButton">Çıkış Yap</button>
-    </div>
 
-    <script>
-        // Kullanıcı daha önce giriş yaptıysa, token'ı kontrol et
-        const token = localStorage.getItem("token");
+  <div class="welcome">Giriş başarılı!</div>
+  <h1>Ana Sayfaya Hoş Geldiniz</h1>
 
-        if (!token) {
-            window.location.href = "login.html";  // Token yoksa, giriş sayfasına yönlendir
-        }
+  <div class="products" id="products">
+    <!-- Ürünler buraya dinamik olarak eklenecek -->
+  </div>
 
-        // Token'ın süresi dolmamışsa, sayfa yenilenebilir.
-        const tokenExpiry = JSON.parse(atob(token.split('.')[1])).exp * 1000;
-        const currentTime = Date.now();
+  <button class="cart-button" onclick="goToCart()">Sepetim</button>
 
-        if (currentTime > tokenExpiry) {
-            localStorage.removeItem("token");
-            window.location.href = "login.html";  // Token süresi dolmuşsa, giriş sayfasına yönlendir
-        }
+  <script>
+    const token = localStorage.getItem('token');
+    if(!token) {
+        window.location.href ='login.html';
+    }
 
-        // Yeni: "Sepetim" butonuna tıklanınca cart.html'e yönlendir
-       document.getElementById("cartButton").addEventListener("click", () => {
-             window.location.href = "cart.html";
+    const products = [
+      { id: 'p1', name: 'Tişört', price: 150 },
+      { id: 'p2', name: 'Ayakkabı', price: 450 },
+      { id: 'p3', name: 'Şapka', price: 100 },
+      { id: 'p4', name: 'Çanta', price: 300 }
+    ];
+
+    const container = document.getElementById('products');
+
+    products.forEach(product => {
+      const div = document.createElement('div');
+      div.className = 'product';
+
+      div.innerHTML = `
+        <h3>${product.name}</h3>
+        <p>${product.price} ₺</p>
+        <div class="quantity-controls">
+          <button onclick="changeQuantity('${product.id}', -1)">-</button>
+          <input type="number" id="qty-${product.id}" value="1" min="1">
+          <button onclick="changeQuantity('${product.id}', 1)">+</button>
+        </div>
+        <button onclick="addToCart('${product.id}', '${product.name}', ${product.price})">Sepete Ekle</button>
+      `;
+
+      container.appendChild(div);
     });
 
-        // Çıkış yap butonu
-        document.getElementById("logoutButton").addEventListener("click", () => {
-            localStorage.removeItem("token");
-            window.location.href = "login.html";  // Çıkış yaptıktan sonra giriş sayfasına yönlendir
-        });
-    </script>
-</body>
+    function changeQuantity(id, delta) {
+      const input = document.getElementById(`qty-${id}`);
+      let current = parseInt(input.value);
+      current += delta;
+      if (current < 1) current = 1;
+      input.value = current;
+    }
 
+    async function addToCart(productId, name, price) {
+      const quantity = parseInt(document.getElementById(`qty-${productId}`).value);
+
+      try {
+        const res = await fetch('/api/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            productId,
+            name,
+            price,
+            quantity
+          })
+        });
+
+        const data = await res.json();
+        alert(data.message || "Sepete eklendi.");
+      } catch (error) {
+        alert('Sepete eklenirken bir hata oluştu.');
+        console.error(error);
+      }
+    }
+    function goToCart(){
+        window.location.href = 'cart.html';
+    }
+
+
+  </script>
+</body>
 </html>
