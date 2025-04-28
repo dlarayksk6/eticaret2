@@ -21,11 +21,13 @@
             <br>
 
             <button type="submit">Giriş Yap</button>
-            <button type="submit" id="passwordButton">Şifrenizi unuttuysanız tıklayınız</button>
+            <button type="button" id="passwordButton">Şifrenizi unuttuysanız tıklayınız</button> 
             <button type="button" id="registerButton">Üye değilseniz kaydolun</button>
         </form>
     </div>
+
     <script>
+        // Giriş formu gönderilince yapılacaklar
         document.getElementById("loginForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             const username = document.getElementById("username").value;
@@ -42,7 +44,7 @@
 
                 const data = await response.json();
 
-                console.log("Backend'den gelen veri:", data);  // Burada gelen yanıtı kontrol edin
+                console.log("Backend'den gelen veri:", data);  // Gelen yanıtı konsolda gör
 
                 if (response.ok) {
                     alert("Giriş başarılı!");
@@ -55,7 +57,7 @@
                         window.location.href = "index.html";
                     }
                 } else {
-                    alert(data.message);  // Hata mesajını göster
+                    alert(data.message);  // Hata mesajı göster
                 }
             } catch (error) {
                 console.error("Hata:", error);
@@ -63,34 +65,15 @@
             }
         });
 
-
+        // Kayıt sayfasına yönlendir
         document.getElementById("registerButton").addEventListener("click", () => {
-            window.location.href = "register.html";  // Kayıt sayfasına yönlendir
+            window.location.href = "register.html";
         }); 
 
-
-        
-        document.getElementById('passwordButton').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-
-            const res = await fetch('http://localhost:5000/forgotpassword', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
-
-            const data = await res.json();
-            alert(data.message);
-
-
-            if (data.resetLink) console.log("Link:", data.resetLink);
-
-        });
-        document.getElementById('passwordButton').addEventListener('click', () => {
+        // Şifremi unuttum sayfasına yönlendir
+        document.getElementById("passwordButton").addEventListener("click", () => {
             window.location.href = "forgotpassword.html";
         });
-
 
     </script>
 
