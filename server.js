@@ -10,7 +10,7 @@ const cartRoutes = require('./routes/cart');
 const orderRoutes = require('./routes/order');
 const path = require('path');
 const productRoutes = require('./routes/products');
-
+const { sendCartUpdatedEmail, sendOrderReceivedEmail } = require('./mailer');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -105,6 +105,28 @@ app.get('/protected', (req, res) => {
         res.json({ message: "Token geçerli", user: decoded });
     });
 });
+
+app.post('/send-cart-updated-email', async (req, res) => {
+    const { email } = req.body;
+    try {
+        await sendCartUpdatedEmail(email);
+        res.status(200).send('Sepet güncellendi e-postası gönderildi.');
+    } catch (error) {
+        res.status(500).send('E-posta gönderme hatası');
+    }
+});
+
+
+app.post('/send-order-received-email', async (req, res) => {
+    const { email } = req.body;
+    try {
+        await sendOrderReceivedEmail(email);
+        res.status(200).send('Sipariş alındı e-postası gönderildi.');
+    } catch (error) {
+        res.status(500).send('E-posta gönderme hatası');
+    }
+});
+
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "register.html"));
