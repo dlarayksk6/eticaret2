@@ -45,4 +45,48 @@ router.get('/all', async (req, res) => {
     }
 });
 
+// Ürün güncelle
+router.put('/:id', authenticate, authorize('supplier'), async (req, res) => {
+    try {
+        const { name, description, price, stock } = req.body;
+        const product = await Product.findOne({ _id: req.params.id, supplierId: req.user.id });
+
+        if (!product) {
+            return res.status(404).json({ message: 'Ürün bulunamadı veya bu işlem için yetkiniz yok' });
+        }
+
+        product.name = name || product.name;
+        product.description = description || product.description;
+        product.price = price || product.price;
+        product.stock = stock || product.stock;
+        product.updatedAt = new Date();
+
+        await product.save();
+        res.json({ message: 'Ürün başarıyla güncellendi', product });
+    } catch (err) {
+        console.error('Ürün güncelleme hatası:', err);
+        res.status(500).json({ message: 'Ürün güncellenirken bir hata oluştu', error: err.message });
+    }
+});
+
+// Ürün sil (soft delete)
+router.delete('/:id', authenticate, authorize('supplier'), async (req, res) => {
+    try {
+        const product = await Product.findOne({ _id: req.params.id, supplierId: req.user.id });
+
+        if (!product) {
+            return res.status(404).json({ message: 'Ürün bulunamadı veya bu işlem için yetkiniz yok' });
+        }
+
+        product.isDeleted = true;
+        product.updatedAt = new Date();
+        await product.save();
+
+        res.json({ message: 'Ürün başarıyla silindi' });
+    } catch (err) {
+        console.error('Ürün silme hatası:', err);
+        res.status(500).json({ message: 'Ürün silinirken bir hata oluştu', error: err.message });
+    }
+});
+
 module.exports = router; 

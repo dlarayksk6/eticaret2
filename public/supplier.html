@@ -12,16 +12,23 @@
             border-collapse: collapse;
             margin-top: 20px;
         }
-        table, th, td {
+
+        table,
+        th,
+        td {
             border: 1px solid #ddd;
         }
-        th, td {
+
+        th,
+        td {
             padding: 12px;
             text-align: left;
         }
+
         th {
             background-color: #f2f2f2;
         }
+
         .modal {
             display: none;
             position: fixed;
@@ -30,8 +37,9 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.4);
+            background-color: rgba(0, 0, 0, 0.4);
         }
+
         .modal-content {
             background-color: #fefefe;
             margin: 10% auto;
@@ -39,6 +47,7 @@
             border: 1px solid #888;
             width: 50%;
         }
+
         .close {
             color: #aaa;
             float: right;
@@ -46,6 +55,7 @@
             font-weight: bold;
             cursor: pointer;
         }
+
         .btn {
             padding: 8px 16px;
             margin: 5px;
@@ -53,14 +63,17 @@
             border: none;
             border-radius: 4px;
         }
+
         .btn-primary {
             background-color: #4CAF50;
             color: white;
         }
+
         .btn-warning {
             background-color: #ff9800;
             color: white;
         }
+
         .btn-danger {
             background-color: #f44336;
             color: white;
@@ -74,9 +87,9 @@
         <div id="userInfo">
             Kullanıcı bilgileri yükleniyor...
         </div>
-        
+
         <button id="addProductBtn" class="btn btn-primary">Yeni Ürün Ekle</button>
-        
+
         <h2>Ürünlerim</h2>
         <div id="productsList">
             <table id="productsTable">
@@ -95,7 +108,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         <button id="logoutButton" class="btn btn-danger">Çıkış Yap</button>
     </div>
 
@@ -107,16 +120,16 @@
             <form id="addProductForm">
                 <label for="productName">Ürün Adı:</label>
                 <input type="text" id="productName" name="productName" required>
-                
+
                 <label for="productDescription">Açıklama:</label>
                 <textarea id="productDescription" name="productDescription"></textarea>
-                
+
                 <label for="productPrice">Fiyat:</label>
                 <input type="number" id="productPrice" name="productPrice" step="0.01" required>
-                
+
                 <label for="productStock">Stok:</label>
                 <input type="number" id="productStock" name="productStock" required>
-                
+
                 <button type="submit" class="btn btn-primary">Ekle</button>
             </form>
         </div>
@@ -129,19 +142,19 @@
             <h2>Ürün Güncelle</h2>
             <form id="editProductForm">
                 <input type="hidden" id="editProductId">
-                
+
                 <label for="editProductName">Ürün Adı:</label>
                 <input type="text" id="editProductName" name="editProductName" required>
-                
+
                 <label for="editProductDescription">Açıklama:</label>
                 <textarea id="editProductDescription" name="editProductDescription"></textarea>
-                
+
                 <label for="editProductPrice">Fiyat:</label>
                 <input type="number" id="editProductPrice" name="editProductPrice" step="0.01" required>
-                
+
                 <label for="editProductStock">Stok:</label>
                 <input type="number" id="editProductStock" name="editProductStock" required>
-                
+
                 <button type="submit" class="btn btn-primary">Güncelle</button>
             </form>
         </div>
@@ -216,14 +229,14 @@
             products.forEach(product => {
                 const row = document.createElement("tr");
                 row.innerHTML = `
-                    <td>${product.id}</td>
+                    <td>${product._id.slice(0, 8)}...</td>
                     <td>${product.name}</td>
                     <td>${product.description || "-"}</td>
                     <td>${product.price}</td>
                     <td>${product.stock}</td>
                     <td>
-                        <button class="btn btn-warning edit-btn" data-id="${product.id}">Düzenle</button>
-                        <button class="btn btn-danger delete-btn" data-id="${product.id}">Sil</button>
+                        <button class="btn btn-warning edit-btn" data-id="${product._id}">Düzenle</button>
+                        <button class="btn btn-danger delete-btn" data-id="${product._id}">Sil</button>
                     </td>
                 `;
                 tableBody.appendChild(row);
@@ -268,7 +281,7 @@
         // Ürün ekleme formu submit
         document.getElementById("addProductForm").addEventListener("submit", async (e) => {
             e.preventDefault();
-            
+
             const productData = {
                 name: document.getElementById("productName").value,
                 description: document.getElementById("productDescription").value,
@@ -317,14 +330,14 @@
                 }
 
                 const products = await response.json();
-                const product = products.find(p => p.id == productId);
+                const product = products.find(p => p._id == productId);
 
                 if (!product) {
                     throw new Error("Ürün bulunamadı");
                 }
 
                 // Modal'ı doldur ve göster
-                document.getElementById("editProductId").value = product.id;
+                document.getElementById("editProductId").value = product._id;
                 document.getElementById("editProductName").value = product.name;
                 document.getElementById("editProductDescription").value = product.description || "";
                 document.getElementById("editProductPrice").value = product.price;
@@ -340,7 +353,7 @@
         // Ürün güncelleme formu submit
         document.getElementById("editProductForm").addEventListener("submit", async (e) => {
             e.preventDefault();
-            
+
             const productId = document.getElementById("editProductId").value;
             const productData = {
                 name: document.getElementById("editProductName").value,
@@ -376,6 +389,11 @@
 
         // Ürün silme
         async function deleteProduct(productId) {
+            if (!productId) {
+                alert('Ürün ID\'si bulunamadı');
+                return;
+            }
+
             if (confirm("Bu ürünü silmek istediğinize emin misiniz?")) {
                 try {
                     const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
@@ -385,12 +403,11 @@
                         }
                     });
 
-                    const data = await response.json();
-
                     if (response.ok) {
                         alert("Ürün başarıyla silindi!");
                         fetchProducts(); // Ürünleri yeniden yükle
                     } else {
+                        const data = await response.json();
                         alert(data.message || "Ürün silinirken bir hata oluştu");
                     }
                 } catch (error) {

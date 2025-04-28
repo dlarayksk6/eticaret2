@@ -124,7 +124,7 @@
   <button class="cart-button" onclick="goToCart()">Sepetim</button>
 
   <script>
-    
+
 
     const token = localStorage.getItem('token');
     if (!token) {
@@ -144,6 +144,7 @@
 
           div.innerHTML = `
             <h3>${product.name}</h3>
+            <p>${product.description || ""}</p>
             <p>${product.price} ₺</p>
             <div class="quantity-controls">
               <button onclick="changeQuantity('${product._id}', -1)">-</button>
@@ -189,7 +190,6 @@
 
         const data = await res.json();
         alert(data.message || "Sepete eklendi.");
-        await sendCartUpdatedEmail(req.user.email);
 
       } catch (error) {
         alert('Sepete eklenirken bir hata oluştu.');
