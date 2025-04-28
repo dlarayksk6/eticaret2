@@ -21,6 +21,7 @@
             <br>
 
             <button type="submit">Giriş Yap</button>
+            <button type="submit" id="passwordButton">Şifrenizi unuttuysanız tıklayınız</button>
             <button type="button" id="registerButton">Üye değilseniz kaydolun</button>
         </form>
     </div>
@@ -66,6 +67,31 @@
         document.getElementById("registerButton").addEventListener("click", () => {
             window.location.href = "register.html";  // Kayıt sayfasına yönlendir
         }); 
+
+
+        
+        document.getElementById('passwordButton').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+
+            const res = await fetch('http://localhost:5000/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await res.json();
+            alert(data.message);
+
+
+            if (data.resetLink) console.log("Link:", data.resetLink);
+
+        });
+        document.getElementById('passwordButton').addEventListener('click', () => {
+            window.location.href = "forgot-password.html";
+        });
+
+
     </script>
 
 </body>
