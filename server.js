@@ -89,7 +89,7 @@ app.post('/login', async (req, res) => {
         res.json({
             message: "Giriş başarılı",
             token,
-            user: { id: user.id, username: user.username, role: user.role }
+            user: { id: user.id, username: user.username, role: user.role, email: user.email }
         });
     } catch (err) {
         console.error("Giriş hatası detay:", err);
@@ -114,8 +114,9 @@ app.get('/protected', (req, res) => {
 
 app.use('/', forgotPasswordRoute);
 app.use('/', resetPasswordRoute);
+app.use('/api/cart', cartRoutes);
 
-
+app.use('/api/order', orderRoutes);
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "register.html"));
 });

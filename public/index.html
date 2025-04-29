@@ -118,7 +118,7 @@
   <h1>Ana Sayfaya Hoş Geldiniz</h1>
 
   <div class="products" id="products">
-    <!-- Ürünler buraya dinamik olarak eklenecek -->
+
   </div>
 
   <button class="cart-button" onclick="goToCart()">Sepetim</button>
@@ -133,11 +133,11 @@
 
     const container = document.getElementById('products');
 
-    // Ürünleri API'den çek
+
     fetch('http://localhost:5000/api/products/all')
       .then(res => res.json())
       .then(products => {
-        container.innerHTML = ""; // Önce temizle
+        container.innerHTML = "";
         products.forEach(product => {
           const div = document.createElement('div');
           div.className = 'product';
@@ -189,13 +189,35 @@
         });
 
         const data = await res.json();
+
         alert(data.message || "Sepete eklendi.");
+        await sendOrderUpdatedMail();
 
       } catch (error) {
         alert('Sepete eklenirken bir hata oluştu.');
         console.error(error);
       }
     }
+
+    async function sendOrderUpdatedMail() {
+      const email = localStorage.getItem('email');
+      if (!email) {
+        console.warn("E-posta bulunamadı.");
+        return;
+      }
+
+      fetch('/api/cart/cart-updated', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      })
+        .then(res => res.text())
+        .then(msg => console.log(msg))
+        .catch(err => console.error("Hata:", err));
+
+    }
+
+
     function goToCart() {
       window.location.href = 'cart.html';
     }

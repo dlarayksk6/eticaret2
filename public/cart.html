@@ -90,7 +90,7 @@
     <ul id="cartItems"></ul>
     <p style="text-align: center; font-size: 18px;">Toplam: <span id="totalPrice">0</span> ₺</p>
     <div style="text-align: center;">
-      <button id="completeOrder" onclick="sendOrderCompletedMail()">Siparişi Tamamla</button>
+      <button id="completeOrder">Siparişi Tamamla</button>
       <button id="goBack">Ana Sayfaya Dön</button>
     </div>
   </div>
@@ -158,6 +158,7 @@
         alert(data.message || "Sipariş alındı.");
 
 
+        await sendOrderCompletedMail();
         fetchCart(); // Sipariş sonrası sepeti temizle
 
       } catch (err) {
@@ -169,21 +170,31 @@
 
     async function sendOrderCompletedMail() {
       const email = localStorage.getItem('email');
+      if (!email) {
+        console.warn("E-posta bulunamadı.");
+        return;
+      }
 
-      fetch('/order-completed', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email: email,  // Buraya o anki kullanıcının maili
-
+      try {
+        fetch('/api/order/order-completed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
         })
-      })
-        .then(response => response.text())
-        .then(data => console.log(data))
-        .catch(error => console.error('Hata:', error));
+
+
+        const msg = await res.text();
+        console.log("Mail sonucu:", msg);
+      } catch (error) {
+        console.error("Mail gönderim hatası:", error);
+      }
     }
+
+
+
+
+
+
     document.getElementById('goBack').addEventListener('click', () => {
       window.location.href = 'index.html';
     });
