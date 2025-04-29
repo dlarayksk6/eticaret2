@@ -1,8 +1,17 @@
 const express = require('express');
-const router  = express.Router();
-const jwt     = require('jsonwebtoken');
-const Cart    = require('../models/Cart');
+const router = express.Router();
+const jwt = require('jsonwebtoken');
+const Cart = require('../models/Cart');
+const nodemailer = require('nodemailer');
 const { JWT_SECRET } = process.env;
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
 // JWT doğrulama
 const authenticate = (req, res, next) => {
@@ -49,7 +58,7 @@ router.post('/add', authenticate, async (req, res) => {
   }
 });
 
-// DELETE /api/cart/remove/:productId → Ürün çıkar
+
 router.delete('/remove/:productId', authenticate, async (req, res) => {
   try {
     const cart = await Cart.findOne({ userId: req.user.id });
@@ -62,6 +71,22 @@ router.delete('/remove/:productId', authenticate, async (req, res) => {
     res.json({ message: 'Ürün çıkarıldı', cart });
   } catch (err) {
     res.status(500).json({ message: 'Çıkarma hatası', error: err });
+  }
+});
+
+router.post('/cart-updated', async (req, res) => {
+  const { email } = req.body;
+  try {
+    await transporter.sendMail({
+      from: '"Destek" <dlarayksk6@gmail.com>',
+      to: email,
+      subject: "Sepetiniz Güncellendi",
+      html: `<p>Sepetiniz başarıyla güncellendi. Hemen alışverişe devam edin!</p>`
+    });
+    res.send('Sepet güncelleme maili gönderildi.');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Sepet maili gönderilirken hata oluştu.');
   }
 });
 
