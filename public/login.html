@@ -21,7 +21,7 @@
             <br>
 
             <button type="submit">Giriş Yap</button>
-            <button type="button" id="passwordButton">Şifrenizi unuttuysanız tıklayınız</button> 
+            <button type="button" id="passwordButton">Şifrenizi unuttuysanız tıklayınız</button>
             <button type="button" id="registerButton">Üye değilseniz kaydolun</button>
         </form>
     </div>
@@ -49,7 +49,9 @@
                 if (response.ok) {
                     alert("Giriş başarılı!");
                     localStorage.setItem("token", data.token);
-
+                    if (data.user && data.user.email) {
+                        localStorage.setItem("email", data.user.email);
+                    }
                     // Kullanıcının rolüne göre yönlendirme
                     if (data.user && data.user.role === "supplier") {
                         window.location.href = "supplier.html";
@@ -68,7 +70,7 @@
         // Kayıt sayfasına yönlendir
         document.getElementById("registerButton").addEventListener("click", () => {
             window.location.href = "register.html";
-        }); 
+        });
 
         // Şifremi unuttum sayfasına yönlendir
         document.getElementById("passwordButton").addEventListener("click", () => {

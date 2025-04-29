@@ -1,9 +1,20 @@
+require('dotenv').config();
 const express = require('express');
-const router  = express.Router();
-const jwt     = require('jsonwebtoken');
-const Cart    = require('../models/Cart');
-const Order   = require('../models/Order');
+const router = express.Router();
+const jwt = require('jsonwebtoken');
+const Cart = require('../models/Cart');
+const Order = require('../models/Order');
+const nodemailer = require('nodemailer');
 const { JWT_SECRET } = process.env;
+
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
 const authenticate = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -47,6 +58,22 @@ router.get('/history', authenticate, async (req, res) => {
     res.json({ orders });
   } catch (err) {
     res.status(500).json({ message: 'Sunucu hatası', error: err });
+  }
+});
+
+router.post('/order-completed', async (req, res) => {
+  const { email } = req.body;
+  try {
+    await transporter.sendMail({
+      from: '"Destek" <dlarayksk6@gmail.com>',
+      to: email,
+      subject: "Siparişiniz Başarıyla Alındı",
+      html: `<p>Teşekkürler! Siparişiniz alınmıştır.</p>`
+    });
+    res.send('Sipariş onay maili gönderildi.');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Sipariş maili gönderilirken hata oluştu.');
   }
 });
 
