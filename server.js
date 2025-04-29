@@ -10,6 +10,10 @@ const cartRoutes = require('./routes/cart');
 const orderRoutes = require('./routes/order');
 const path = require('path');
 const productRoutes = require('./routes/products');
+const forgotPasswordRoute = require('./routes/forgotPassword');
+const resetPasswordRoute = require('./routes/resetPassword');
+
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -19,11 +23,12 @@ connectMongo();
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(express.urlencoded({ extended: true }));   ////
 
 app.use('/api/cart', cartRoutes);
 app.use('/api/order', orderRoutes);
 app.use('/api/products', productRoutes);
+app.use(express.static('public'));
 
 
 app.get("/login.html", (req, res) => {
@@ -104,6 +109,10 @@ app.get('/protected', (req, res) => {
         res.json({ message: "Token geçerli", user: decoded });
     });
 });
+
+
+app.use('/', forgotPasswordRoute);
+app.use('/', resetPasswordRoute);
 
 
 app.get("/", (req, res) => {
