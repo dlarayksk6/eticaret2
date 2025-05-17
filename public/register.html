@@ -38,7 +38,7 @@
             const email = document.getElementById("email").value;
             const role = document.getElementById("role").value;
             try {
-                const response = await fetch("http://localhost:5000/register", {
+                const response = await fetch("http://localhost:5000/api/auth/register", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -50,7 +50,7 @@
 
                 if (response.ok) {
                     alert("Kayıt başarılı!");
-                    window.location.href = "login.html";  // Kayıt sonrası giriş sayfasına yönlendir
+                    window.location.href = "login.html";
                 } else {
                     alert(data.message);
                 }

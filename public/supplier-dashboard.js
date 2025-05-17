@@ -1,23 +1,22 @@
-// Token ve kullanıcı bilgilerini localStorage'dan al
+
 const token = localStorage.getItem('token');
 const user = JSON.parse(localStorage.getItem('user'));
 
-// Token yoksa login sayfasına yönlendir
+
 if (!token || !user) {
     window.location.href = '/login.html';
 }
 
-// Kullanıcı bilgilerini göster
 document.getElementById('userInfo').textContent = `${user.username}`;
 
-// Çıkış yap fonksiyonu
+
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.href = '/login.html';
 }
 
-// İstatistikleri getir
+
 async function loadStats() {
     try {
         const response = await fetch('/api/suppliers/stats', {
@@ -35,7 +34,7 @@ async function loadStats() {
     }
 }
 
-// Ürünleri listele
+
 async function loadProducts() {
     try {
         const response = await fetch(`/api/suppliers/profile/${user.id}`, {
@@ -75,7 +74,7 @@ async function loadProducts() {
     }
 }
 
-// Yeni ürün ekle
+
 async function addProduct() {
     const form = document.getElementById('addProductForm');
     const formData = new FormData(form);
@@ -109,8 +108,6 @@ async function addProduct() {
         alert('Ürün eklenirken bir hata oluştu');
     }
 }
-
-// Ürün düzenleme modalını aç
 async function editProduct(productId) {
     try {
         const response = await fetch(`/api/products/${productId}`, {
@@ -133,7 +130,7 @@ async function editProduct(productId) {
     }
 }
 
-// Ürün güncelle
+
 async function updateProduct() {
     const form = document.getElementById('editProductForm');
     const formData = new FormData(form);
@@ -167,7 +164,7 @@ async function updateProduct() {
     }
 }
 
-// Ürün sil
+
 async function deleteProduct(productId) {
     if (!confirm('Bu ürünü silmek istediğinizden emin misiniz?')) {
         return;
@@ -194,7 +191,6 @@ async function deleteProduct(productId) {
     }
 }
 
-// Sayfa yüklendiğinde verileri getir
 document.addEventListener('DOMContentLoaded', () => {
     loadStats();
     loadProducts();

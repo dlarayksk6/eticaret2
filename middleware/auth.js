@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const pool = require('../db'); // MySQL bağlantısı
+const pool = require('../db');
 
 exports.authenticate = async (req, res, next) => {
     try {
@@ -12,12 +12,12 @@ exports.authenticate = async (req, res, next) => {
         }
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            // MySQL'den kullanıcıyı bul
+
             const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [decoded.id]);
             if (rows.length === 0) {
                 return res.status(401).json({ message: 'Not authorized to access this route' });
             }
-            req.user = rows[0]; // Kullanıcıyı req.user'a ata
+            req.user = rows[0];
             next();
         } catch (error) {
             return res.status(401).json({ message: 'Not authorized to access this route' });
@@ -27,7 +27,7 @@ exports.authenticate = async (req, res, next) => {
     }
 };
 
-// Middleware to check user role
+
 exports.authorize = (...roles) => {
     return (req, res, next) => {
         if (!roles.includes(req.user.role)) {
