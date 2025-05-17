@@ -26,7 +26,6 @@ const authenticate = (req, res, next) => {
   });
 };
 
-// POST /api/order/complete → Siparişi oluştur ve sepeti temizle
 router.post('/complete', authenticate, async (req, res) => {
   try {
     const cart = await Cart.findOne({ userId: req.user.id });
@@ -40,7 +39,7 @@ router.post('/complete', authenticate, async (req, res) => {
       totalPrice: cart.totalPrice
     });
 
-    // Sepeti sıfırla
+
     cart.items = [];
     cart.totalPrice = 0;
     await cart.save();
@@ -51,7 +50,7 @@ router.post('/complete', authenticate, async (req, res) => {
   }
 });
 
-// GET /api/order/history → Kullanıcının sipariş geçmişi
+
 router.get('/history', authenticate, async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.user.id });

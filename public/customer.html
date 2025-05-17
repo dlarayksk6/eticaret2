@@ -72,18 +72,18 @@
         </div>
 
         <div class="row" id="productsContainer">
-            <!-- Ürünler buraya dinamik olarak eklenecek -->
+
         </div>
     </div>
 
     <script>
-        // Token kontrolü
+
         const token = localStorage.getItem("token");
         if (!token) {
             window.location.href = "login.html";
         }
 
-        // Tedarikçileri getir
+
         async function loadSuppliers() {
             try {
                 const response = await fetch('/api/suppliers/all');
@@ -101,7 +101,7 @@
             }
         }
 
-        // Ürünleri getir
+
         async function loadProducts() {
             try {
                 const response = await fetch('/api/products');
@@ -112,7 +112,7 @@
             }
         }
 
-        // Ürünleri görüntüle
+
         function displayProducts(products) {
             const container = document.getElementById('productsContainer');
             container.innerHTML = '';
@@ -146,7 +146,7 @@
             });
         }
 
-        // Ürün ara
+
         function searchProducts() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const products = document.querySelectorAll('.product-card');
@@ -163,7 +163,7 @@
             });
         }
 
-        // Tedarikçiye göre filtrele
+
         async function filterProducts() {
             const supplierId = document.getElementById('supplierFilter').value;
             try {
@@ -175,19 +175,19 @@
             }
         }
 
-        // Sepete ekle
+
         function addToCart(productId) {
-            // Sepet işlemleri burada yapılacak
+
             alert('Ürün sepete eklendi!');
         }
 
-        // Çıkış yap
+
         document.getElementById('logoutButton').addEventListener('click', () => {
             localStorage.removeItem('token');
             window.location.href = 'login.html';
         });
 
-        // Sayfa yüklendiğinde
+
         document.addEventListener('DOMContentLoaded', () => {
             loadSuppliers();
             loadProducts();

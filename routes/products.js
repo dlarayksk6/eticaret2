@@ -3,11 +3,11 @@ const router = express.Router();
 const { Product } = require('../mongo');
 const { authenticate, authorize } = require('../middleware/auth');
 
-// Ürün ekle
+
 router.post('/', authenticate, authorize('supplier'), async (req, res) => {
     try {
         const { name, description, price, stock } = req.body;
-        const supplierId = req.user.id; // Token'dan geliyor
+        const supplierId = req.user.id;
 
         const newProduct = new Product({
             name,
@@ -25,7 +25,7 @@ router.post('/', authenticate, authorize('supplier'), async (req, res) => {
     }
 });
 
-// Tüm ürünleri getir
+
 router.get('/', authenticate, authorize('supplier'), async (req, res) => {
     try {
         const products = await Product.find({ supplierId: req.user.id, isDeleted: false });
@@ -35,7 +35,6 @@ router.get('/', authenticate, authorize('supplier'), async (req, res) => {
     }
 });
 
-// Herkesin görebileceği: Tüm ürünleri getir
 router.get('/all', async (req, res) => {
     try {
         const products = await Product.find({ isDeleted: false });
@@ -45,7 +44,7 @@ router.get('/all', async (req, res) => {
     }
 });
 
-// Ürün güncelle
+
 router.put('/:id', authenticate, authorize('supplier'), async (req, res) => {
     try {
         const { name, description, price, stock } = req.body;
@@ -69,7 +68,6 @@ router.put('/:id', authenticate, authorize('supplier'), async (req, res) => {
     }
 });
 
-// Ürün sil (soft delete)
 router.delete('/:id', authenticate, authorize('supplier'), async (req, res) => {
     try {
         const product = await Product.findOne({ _id: req.params.id, supplierId: req.user.id });

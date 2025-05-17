@@ -20,21 +20,21 @@
             <input type="password" id="password" name="password" required>
             <br>
 
-            <button type="submit">Giriş Yap</button>
+            <button type="submit" id="loginButton">Giriş Yap</button>
             <button type="button" id="passwordButton">Şifrenizi unuttuysanız tıklayınız</button>
             <button type="button" id="registerButton">Üye değilseniz kaydolun</button>
         </form>
     </div>
 
     <script>
-        // Giriş formu gönderilince yapılacaklar
+
         document.getElementById("loginForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
 
             try {
-                const response = await fetch("http://localhost:5000/login", {
+                const response = await fetch("http://localhost:5000/api/auth/login", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -44,7 +44,7 @@
 
                 const data = await response.json();
 
-                console.log("Backend'den gelen veri:", data);  // Gelen yanıtı konsolda gör
+                console.log("Backend'den gelen veri:", data);
 
                 if (response.ok) {
                     alert("Giriş başarılı!");
@@ -52,14 +52,14 @@
                     if (data.user && data.user.email) {
                         localStorage.setItem("email", data.user.email);
                     }
-                    // Kullanıcının rolüne göre yönlendirme
+
                     if (data.user && data.user.role === "supplier") {
                         window.location.href = "supplier.html";
                     } else if (data.user && data.user.role === "customer") {
                         window.location.href = "index.html";
                     }
                 } else {
-                    alert(data.message);  // Hata mesajı göster
+                    alert(data.message);
                 }
             } catch (error) {
                 console.error("Hata:", error);
@@ -67,12 +67,12 @@
             }
         });
 
-        // Kayıt sayfasına yönlendir
+
         document.getElementById("registerButton").addEventListener("click", () => {
             window.location.href = "register.html";
         });
 
-        // Şifremi unuttum sayfasına yönlendir
+
         document.getElementById("passwordButton").addEventListener("click", () => {
             window.location.href = "forgotpassword.html";
         });

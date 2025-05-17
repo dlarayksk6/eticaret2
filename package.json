@@ -1,0 +1,28 @@
+{
+  "name": "eticaret2-1",
+  "version": "1.0.0",
+  "description": "- MySQL kullanarak müşteri ve tedarikçi verilerini MySQL'de sipariş,sepet verilerini MongoDb de kaydederek bir e ticaret sitesi oluşturmak\r - Veri kayıtlarını postmanla test etmek",
+  "main": "db.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dlarayksk6/eticaret2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dlarayksk6/eticaret2/issues"
+  },
+  "homepage": "https://github.com/dlarayksk6/eticaret2#readme",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.1.1"
+  }
+}

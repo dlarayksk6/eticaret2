@@ -4,7 +4,6 @@ const { SupplierProfile } = require('../models/supplierProfile');
 const { Product } = require('../config/mongodb');
 const { authorize } = require('../middleware/auth');
 
-// Tedarikçi profilini oluştur/güncelle
 router.post('/profile', authorize('supplier'), async (req, res) => {
     try {
         const {
@@ -19,7 +18,7 @@ router.post('/profile', authorize('supplier'), async (req, res) => {
         let profile = await SupplierProfile.findOne({ userId: req.user.id });
 
         if (profile) {
-            // Profil varsa güncelle
+
             profile.storeName = storeName || profile.storeName;
             profile.description = description || profile.description;
             profile.logo = logo || profile.logo;
@@ -28,7 +27,7 @@ router.post('/profile', authorize('supplier'), async (req, res) => {
             profile.socialMedia = socialMedia || profile.socialMedia;
             profile.updatedAt = new Date();
         } else {
-            // Yeni profil oluştur
+
             profile = new SupplierProfile({
                 userId: req.user.id,
                 storeName,
@@ -48,7 +47,7 @@ router.post('/profile', authorize('supplier'), async (req, res) => {
     }
 });
 
-// Tedarikçi profilini getir
+
 router.get('/profile/:userId', async (req, res) => {
     try {
         const profile = await SupplierProfile.findOne({ userId: req.params.userId });
@@ -56,7 +55,7 @@ router.get('/profile/:userId', async (req, res) => {
             return res.status(404).json({ message: "Profil bulunamadı" });
         }
 
-        // Tedarikçinin ürünlerini de getir
+
         const products = await Product.find({
             supplierId: req.params.userId,
             isDeleted: false
@@ -69,7 +68,7 @@ router.get('/profile/:userId', async (req, res) => {
     }
 });
 
-// Tüm tedarikçileri listele
+
 router.get('/all', async (req, res) => {
     try {
         const suppliers = await SupplierProfile.find()
@@ -81,7 +80,6 @@ router.get('/all', async (req, res) => {
     }
 });
 
-// Tedarikçi istatistiklerini getir
 router.get('/stats', authorize('supplier'), async (req, res) => {
     try {
         const totalProducts = await Product.countDocuments({

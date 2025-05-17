@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// JWT doğrulama
+
 const authenticate = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'Token gerekli' });
@@ -28,7 +28,6 @@ const authenticate = (req, res, next) => {
   });
 };
 
-// GET /api/cart → Sepeti getir (yoksa oluşturur)
 router.get('/', authenticate, async (req, res) => {
   try {
     let cart = await Cart.findOne({ userId: req.user.id });
@@ -41,7 +40,7 @@ router.get('/', authenticate, async (req, res) => {
   }
 });
 
-// POST /api/cart/add → Sepete ürün ekle
+
 router.post('/add', authenticate, async (req, res) => {
   const { productId, name, price, quantity } = req.body;
   try {

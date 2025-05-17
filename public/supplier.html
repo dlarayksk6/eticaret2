@@ -161,29 +161,28 @@
     </div>
 
     <script>
-        // Token kontrolü
+
         const token = localStorage.getItem("token");
         if (!token) {
-            window.location.href = "login.html";  // Token yoksa, giriş sayfasına yönlendir
+            window.location.href = "login.html";
         }
 
-        // Token'ın süresi dolmamışsa, sayfa yenilenebilir.
+
         try {
             const tokenExpiry = JSON.parse(atob(token.split('.')[1])).exp * 1000;
             const currentTime = Date.now();
 
             if (currentTime > tokenExpiry) {
                 localStorage.removeItem("token");
-                window.location.href = "login.html";  // Token süresi dolmuşsa, giriş sayfasına yönlendir
+                window.location.href = "login.html";
             }
 
-            // Kullanıcı bilgisini çöz
             const tokenData = JSON.parse(atob(token.split('.')[1]));
             document.getElementById("userInfo").innerHTML = `
                 <p>Hoş Geldin: <strong>${tokenData.username}</strong> | Rol: <strong>${tokenData.role}</strong></p>
             `;
 
-            // Eğer rol tedarikçi değilse ana sayfaya yönlendir
+
             if (tokenData.role !== "supplier") {
                 alert("Bu sayfaya erişim izniniz yok!");
                 window.location.href = "index.html";
@@ -194,7 +193,6 @@
             window.location.href = "login.html";
         }
 
-        // Ürünleri getir
         async function fetchProducts() {
             try {
                 const response = await fetch("http://localhost:5000/api/products", {
@@ -216,7 +214,7 @@
             }
         }
 
-        // Ürünleri tabloda göster
+
         function displayProducts(products) {
             const tableBody = document.getElementById("productsTableBody");
             tableBody.innerHTML = "";
@@ -242,18 +240,16 @@
                 tableBody.appendChild(row);
             });
 
-            // Düzenle butonlarına event listener ekle
             document.querySelectorAll(".edit-btn").forEach(button => {
                 button.addEventListener("click", () => editProduct(button.dataset.id));
             });
 
-            // Sil butonlarına event listener ekle
             document.querySelectorAll(".delete-btn").forEach(button => {
                 button.addEventListener("click", () => deleteProduct(button.dataset.id));
             });
         }
 
-        // Modal açma/kapama işlevleri
+
         const addProductModal = document.getElementById("addProductModal");
         const editProductModal = document.getElementById("editProductModal");
         const addProductBtn = document.getElementById("addProductBtn");
@@ -278,7 +274,6 @@
             }
         });
 
-        // Ürün ekleme formu submit
         document.getElementById("addProductForm").addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -305,7 +300,7 @@
                     alert("Ürün başarıyla eklendi!");
                     document.getElementById("addProductForm").reset();
                     addProductModal.style.display = "none";
-                    fetchProducts(); // Ürünleri yeniden yükle
+                    fetchProducts();
                 } else {
                     alert(data.message || "Ürün eklenirken bir hata oluştu");
                 }
@@ -315,7 +310,6 @@
             }
         });
 
-        // Ürün düzenleme
         async function editProduct(productId) {
             try {
                 const response = await fetch(`http://localhost:5000/api/products`, {
@@ -336,7 +330,7 @@
                     throw new Error("Ürün bulunamadı");
                 }
 
-                // Modal'ı doldur ve göster
+
                 document.getElementById("editProductId").value = product._id;
                 document.getElementById("editProductName").value = product.name;
                 document.getElementById("editProductDescription").value = product.description || "";
@@ -350,7 +344,7 @@
             }
         }
 
-        // Ürün güncelleme formu submit
+
         document.getElementById("editProductForm").addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -377,7 +371,7 @@
                 if (response.ok) {
                     alert("Ürün başarıyla güncellendi!");
                     editProductModal.style.display = "none";
-                    fetchProducts(); // Ürünleri yeniden yükle
+                    fetchProducts();
                 } else {
                     alert(data.message || "Ürün güncellenirken bir hata oluştu");
                 }
@@ -387,7 +381,7 @@
             }
         });
 
-        // Ürün silme
+
         async function deleteProduct(productId) {
             if (!productId) {
                 alert('Ürün ID\'si bulunamadı');
@@ -405,7 +399,7 @@
 
                     if (response.ok) {
                         alert("Ürün başarıyla silindi!");
-                        fetchProducts(); // Ürünleri yeniden yükle
+                        fetchProducts();
                     } else {
                         const data = await response.json();
                         alert(data.message || "Ürün silinirken bir hata oluştu");
@@ -417,13 +411,13 @@
             }
         }
 
-        // Çıkış yap butonu
+
         document.getElementById("logoutButton").addEventListener("click", () => {
             localStorage.removeItem("token");
-            window.location.href = "login.html";  // Çıkış yaptıktan sonra giriş sayfasına yönlendir
+            window.location.href = "login.html";
         });
 
-        // Sayfa yüklendiğinde ürünleri getir
+
         document.addEventListener("DOMContentLoaded", () => {
             fetchProducts();
         });
