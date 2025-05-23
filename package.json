@@ -1,6 +1,7 @@
 {
   "name": "eticaret2-1",
   "version": "1.0.0",
+  "type": "module",
   "description": "- MySQL kullanarak müşteri ve tedarikçi verilerini MySQL'de sipariş,sepet verilerini MongoDb de kaydederek bir e ticaret sitesi oluşturmak\r - Veri kayıtlarını postmanla test etmek",
   "main": "db.js",
   "directories": {
@@ -23,6 +24,8 @@
   "homepage": "https://github.com/dlarayksk6/eticaret2#readme",
   "devDependencies": {
     "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "type": "module",
     "supertest": "^7.1.1"
   }
 }
