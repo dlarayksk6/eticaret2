@@ -27,7 +27,7 @@ describe('handleRegister', () => {
         emailInput = document.getElementById("email");
         roleInput = document.getElementById("role");
 
-        // Reset fetch and alert mocks
+
         fetch.mockReset();
         alert.mockReset();
     });
