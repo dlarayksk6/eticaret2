@@ -1,16 +1,11 @@
-/**
- * @jest-environment jsdom
- */
+import { handleRegister } from '../../public/register.js';
 
-const { handleRegister } = require('../../public/register.js');
 
 
 global.fetch = jest.fn();
 global.alert = jest.fn();
 
 describe('handleRegister', () => {
-    let form, usernameInput, passwordInput, emailInput, roleInput;
-
     beforeEach(() => {
         document.body.innerHTML = `
             <form id="registerForm">
@@ -20,13 +15,6 @@ describe('handleRegister', () => {
                 <input id="role" value="user" />
             </form>
         `;
-
-        form = document.getElementById("registerForm");
-        usernameInput = document.getElementById("username");
-        passwordInput = document.getElementById("password");
-        emailInput = document.getElementById("email");
-        roleInput = document.getElementById("role");
-
 
         fetch.mockReset();
         alert.mockReset();

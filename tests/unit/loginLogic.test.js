@@ -1,52 +1,52 @@
-const { handleLogin } = require('../../public/loginLogic');
+import { handleLogin } from '../../public/loginLogic.js';
 
 global.fetch = jest.fn();
 
 describe('handleLogin', () => {
-    afterEach(() => {
-        jest.clearAllMocks();
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('giriş başarılı olduğunda token dönmeli', async () => {
+    const mockResponse = {
+      token: 'fake-token',
+      user: { role: 'customer', email: 'test@example.com' },
+    };
+
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockResponse,
     });
 
-    test('giriş başarılı olduğunda token dönmeli', async () => {
-        const mockResponse = {
-            token: 'fake-token',
-            user: { role: 'customer', email: 'test@example.com' }
-        };
+    const result = await handleLogin('testuser', 'testpass');
 
-        fetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockResponse
-        });
+    expect(result.ok).toBe(true);
+    expect(result.data.token).toBe('fake-token');
+    expect(result.data.user.email).toBe('test@example.com');
+  });
 
-        const result = await handleLogin('testuser', 'testpass');
+  test('giriş başarısız olduğunda mesaj dönmeli', async () => {
+    const mockResponse = {
+      message: 'Geçersiz bilgiler',
+    };
 
-        expect(result.ok).toBe(true);
-        expect(result.data.token).toBe('fake-token');
-        expect(result.data.user.email).toBe('test@example.com');
+    fetch.mockResolvedValueOnce({
+      ok: false,
+      json: async () => mockResponse,
     });
 
-    test('giriş başarısız olduğunda mesaj dönmeli', async () => {
-        const mockResponse = {
-            message: 'Geçersiz bilgiler'
-        };
+    const result = await handleLogin('wronguser', 'wrongpass');
 
-        fetch.mockResolvedValueOnce({
-            ok: false,
-            json: async () => mockResponse
-        });
+    expect(result.ok).toBe(false);
+    expect(result.data.message).toBe('Geçersiz bilgiler');
+  });
 
-        const result = await handleLogin('wronguser', 'wrongpass');
+  test('hata oluştuğunda genel hata mesajı dönmeli', async () => {
+    fetch.mockRejectedValueOnce(new Error('Network error'));
 
-        expect(result.ok).toBe(false);
-        expect(result.data.message).toBe('Geçersiz bilgiler');
-    });
+    const result = await handleLogin('any', 'any');
 
-    test('hata oluştuğunda genel hata mesajı dönmeli', async () => {
-        fetch.mockRejectedValueOnce(new Error('Network error'));
-
-        const result = await handleLogin('any', 'any');
-
-        expect(result.ok).toBe(false);
-        expect(result.error).toBe('Giriş sırasında bir hata oluştu.');
-    });
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('Giriş sırasında bir hata oluştu.');
+  });
 });
