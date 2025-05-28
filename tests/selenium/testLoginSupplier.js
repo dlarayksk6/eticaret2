@@ -13,7 +13,8 @@ const { Builder, By, until } = require('selenium-webdriver');
         await driver.findElement(By.id('username')).sendKeys('suppliertest11');
         await driver.findElement(By.id('email')).sendKeys('supplier11@example.com');
         await driver.findElement(By.id('password')).sendKeys('sup123456');
-        await driver.findElement(By.id('role')).sendKeys('supplier');
+        let roleSelect = await driver.findElement(By.id('role'));
+        await roleSelect.findElement(By.css('option[value="supplier"]')).click();
 
 
         await driver.findElement(By.css('button[type="submit"]')).click();
